@@ -1,8 +1,6 @@
-from unittest import expectedFailure
-from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializers import DirectorSerializer, MovieSerializer, ReviewSerializer
+from .serializers import DirectorSerializer, MovieSerializer, ReviewSerializer, MovieWithReviewSerializer
 from .models import Director, Movie, Review
 from rest_framework import status
 
@@ -62,12 +60,14 @@ def review_detail_view(request, id):
 
 
 @api_view(['GET'])
-def test_view(request):
-    dict_ = {
-        'text': 'Hello',
-        'int': 100,
-        'bool': True,
-        'float': 99.9999,
-        'list': [1, 2, 3, 4]
-    }
-    return Response(data=dict_)
+def movie_view(request):
+    movie = Movie.objects.all()
+    serializer = MovieSerializer(movie, many=True)
+    return Response(data=serializer.data)
+
+
+@api_view(['GET'])
+def movie_review_view(request):
+    movie_review = Movie.objects.all()
+    data = MovieWithReviewSerializer(movie_review, many=True).data
+    return Response(data=data)
