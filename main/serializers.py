@@ -41,16 +41,31 @@ class DirectorCountSerializer(serializers.ModelSerializer):
         return movie.all().count()
 
 
+class DirectorValidateSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=30)
+
+    def validate_name(self, name):
+        if Director.objects.filter(name=name):
+            raise ValidationError("This name is already exists")
+        return name
+
+
 class MovieValidateUpdateSerializer(serializers.Serializer):
     title = serializers.CharField(min_length=3, max_length=50)
     description = serializers.CharField()
-    duration = serializers.IntegerField(required=False)
+    duration = serializers.IntegerField()
     director_id = serializers.IntegerField()
 
     def validate_title(self, title):
         if Movie.objects.filter(title=title):
             raise ValidationError("Select unique name for your movie")
         return title
+
+    class Meta:
+        fields = '__all__'
+
+    def create(self, validated_data):
+        return Movie.objects.create(**validated_data)
 
 
 class ReviewValidateSerializer(serializers.Serializer):
@@ -64,12 +79,3 @@ class ReviewValidateSerializer(serializers.Serializer):
         except:
             raise ValidationError("Choose correct id movie")
         return movie_id
-
-
-class DirectorValidateSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=30)
-
-    def validate_name(self, name):
-        if Director.objects.filter(name=name):
-            raise ValidationError("This name is already exists")
-        return name
